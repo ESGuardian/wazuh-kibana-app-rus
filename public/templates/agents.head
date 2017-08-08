@@ -1,0 +1,91 @@
+<div flex ng-controller="agentsController" layout="column">
+    <md-content class="wazuhMenuNavBar" ng-init="menuNavItem = 'agents'" style="height: 70px;">
+        <md-nav-bar class="wazuhMenuNav" md-selected-nav-item="menuNavItem" nav-bar-aria-label="navigation menu">
+            <md-nav-item id="header_logo" md-nav-href="#/" name="logo" aria-hidden="true">
+                <img aria-hidden="true" src="/plugins/wazuh/img/logo_white.png" height="44" weight="252"></img>
+            </md-nav-item>
+			<md-nav-item md-nav-href="#/overview" name="overview">Обзор</md-nav-item>
+			<md-nav-item md-nav-href="#/manager" name="manager">Менеджер</md-nav-item>
+			<md-nav-item md-nav-href="#/agents" name="agents" ng-click="console.log('hey');">Агенты</md-nav-item>
+			<md-nav-item md-nav-href="#/discover" name="discover">Поиск</md-nav-item>
+			<md-nav-item md-nav-href="#/dashboards" name="dashboards">Дашборды</md-nav-item>
+			<md-nav-item class="wazuhMenuNavBar_gear" md-nav-href="#/settings" name="settings"><i class="fa fa-cog ng-scope" aria-hidden="true" ></i></md-nav-item>
+        </md-nav-bar>
+    </md-content> 
+
+	<md-progress-linear class="md-accent" md-mode="indeterminate" ng-show="load"></md-progress-linear>
+
+	<div flex layout="row" style="height: 100%; {{(tabView != 'discover') ? 'background-color: #e4e4e4' : ''}}" >
+		<md-content flex id="content" style="height: 100%;">
+			<md-content layout="row" layout-align="space-between start" style="background-color: #f7f7f7"> 
+				<md-toolbar style="height: 50px;">
+					<div class="md-toolbar-tools" layout="row" layout-align="space-between center">
+						<div style="text-transform: none; font-size: 20px;" ng-if="_agent">
+						
+							<div style="float: left;margin-top: 3px;margin-right: 11px;">
+								<span> <i style="margin-right: 5px; " class="fa fa-desktop" aria-hidden="true"></i>
+								{{_agent.id}} - {{_agent.name}}</span><span ng-show="_agent.id == '000'">(Manager)</span>
+							</div>
+
+							<div style="float: left;margin-right: 11px;">
+								<span ng-show="_agent.status" ng-class="getAgentStatusClass(_agent.status)" style="width: 100%;padding: 4px;color: white;font-weight: normal;font-size: 12px;text-transform: uppercase;">{{formatAgentStatus(_agent.status)}}</span>
+							</div>
+							
+							<div ng-click="restartAgent()" style="float: left;" ng-show="_agent.status == 'Active' && _agent.id != '000' ">
+								<span style="width: 100%;background-color: #3caed2;padding: 4px;color: white;font-weight: normal;font-size: 12px;text-transform: uppercase;">Restart</span>
+							</div>
+							
+						
+						</div>
+						
+						<div ng-if="!_agent"> 
+							<h2 class="wazuh-h2" style="text-transform: none; font-size: 20px;">
+								<i style="margin-right: 5px; " class="fa fa-desktop" aria-hidden="true"></i> Agents overview
+							</h2>
+						</div>
+						<span layout="row" style="padding-left: 0px;" layout-align="space-between start" flex="40">
+							<md-autocomplete id="agentsAutocomplete" flex md-no-cache="true" md-select-on-match="true" md-selected-item="_swpagent" md-selected-item-change="applyAgent(_swpagent)" md-search-text="search"
+								md-items="item in agentsSearch(search)" md-item-text="item.name" md-min-length="0" md-no-asterisk="false" md-menu-class="autocomplete-custom-agents-bar"
+								placeholder="Поиск по имени, ID или IP адресу"> 
+								<md-item-template>
+									<span class="item-title">
+										<span><strong md-highlight-text="search" md-highlight-flags="i"> {{item.name}} ({{item.id}}) </strong></span>
+									</span>
+									<span class="item-metadata">
+												<span class="item-metastat" md-highlight-text="search" md-highlight-flags="i"> {{item.ip}} ({{item.status}}) </span>
+									</span>
+								</md-item-template>
+								<md-not-found>
+									Агенты по запросу "{{search}}" не найдены.
+								</md-not-found>
+							</md-autocomplete>
+						</span>
+					</div>
+				</md-toolbar>
+			</md-content>
+			
+			<md-content layout="row" layout-align="space-between start" class="horizontalTabsBar">
+			
+				<md-content ng-show="_agent" class="horizontalTabsBar" layout="column" layout-align="center start">
+					<md-nav-bar style="padding-right: 0px;" md-selected-nav-item="submenuNavItem" nav-bar-aria-label="navigation submenu">
+						<md-nav-item md-nav-click="switchTab('overview')" name="overview">Обзор</md-nav-item>
+						<md-nav-item md-nav-click="switchTab('fim');" name="fim">Целостность файлов</md-nav-item>
+						<md-nav-item md-nav-click="switchTab('policy_monitoring');" name="policy_monitoring">Мониторинг политик</md-nav-item>
+						<md-nav-item md-nav-click="switchTab('oscap');" name="oscap"  ng-show="extensions.oscap">SCAP</md-nav-item>
+						<md-nav-item md-nav-click="switchTab('audit');" name="audit" ng-show="extensions.audit">Аудит</md-nav-item> 
+						<md-nav-item md-nav-click="switchTab('pci');" name="pci" ng-show="extensions.pci">PCI DSS</md-nav-item> 
+					</md-nav-bar>
+				</md-content>
+				
+				<md-content ng-show="_agent" class="horizontalTabsBar tabView" layout="column" layout-align="end end">
+					<md-nav-bar layout-align="end end" style="padding-right: 0px;" md-selected-nav-item="tabView" nav-bar-aria-label="navigation submenu">
+						<md-nav-item md-nav-click="tabView = 'panels'" name="panels">
+							<i class="fa fa-th" aria-hidden="true" style="font-size: 13px;margin-right: 6px;"></i>Панели
+						</md-nav-item>
+						<md-nav-item md-nav-click="tabView = 'discover'" name="discover">
+							<img style="width: 16px; margin-right: 6px;" src="/plugins/wazuh/img/discover.svg">Поиск
+						</md-nav-item>
+					</md-nav-bar> 
+				</md-content>
+
+			</md-content>

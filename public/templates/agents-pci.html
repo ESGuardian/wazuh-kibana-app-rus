@@ -1,0 +1,82 @@
+<md-content ng-if="submenuNavItem == 'pci' && _agent" id="agents-pci" ng-controller="PCIController">
+
+	<!-- Kibana search bar -->
+	<kbn-searchbar class="wazuh-searchbar" ng-if="tabView == 'panels'"></kbn-searchbar>
+	
+	<!-- No results message -->
+	<md-content flex layout="row" layout-align="start start" ng-if="!results && tabView == 'panels'">
+		<md-card flex layout="column">
+			<md-card-content style="text-align: center;">
+				Ничего не найдено в этом интервале времени
+			</md-card-content>
+		</md-card>		
+	</md-content> 
+	
+	
+	<!-- View: Discover -->
+	<md-content style="background-color: white" flex layout="column" layout-align="start space-around" ng-if="tabView == 'discover'" >
+		<kbn-disfull table-height="1000px;" dis-a="(columns:!(_source),filters:!(),index:'wazuh-alerts-*',interval:auto,query:(query_string:(analyze_wildcard:!t,query:'*')),sort:!('@timestamp',desc))"
+		dis-filter="_exists_:rule.pci_dss AND agent.name: {{_agent.name ? _agent.name : '*'}} AND manager.name: {{defaultManager ? defaultManager : '*'}}"
+		infinite-scroll="true">
+		</kbn-disfull>
+	</md-content>
+	
+    <div flex ng-if="tabView == 'panels' && results && !load" layout="column"> 
+        <md-progress-linear class="md-accent" md-mode="indeterminate" ng-show="load"></md-progress-linear>
+		<md-content layout="row" layout-align="center stretch">
+		<md-card flex>
+			<md-tabs md-selected="selectedIndex" md-border-bottom md-dynamic-height id="pciReq_tab">
+				<md-tab ng-repeat="tab in tabs" ng-disabled="tab.disabled" label="{{tab.title}}">
+					<md-content style="background-color: white;" class="md-padding">
+						<h1 class="md-display-2 wazuh-h1" style="line-height: 40px; margin: 0;">PCI DSS Критерий: {{tab.title}}</h1>
+						<div ng-bind-html="tab.content"></div>
+					</md-content>
+				</md-tab>
+			</md-tabs>
+		</md-card>
+	</md-content>
+	
+	<md-content layout="row" layout-align="center stretch">
+		<md-card flex="70">
+			<md-card-title>
+				<md-card-title-text>
+					<span class="md-headline">Требования</span>
+				</md-card-title-text>
+			</md-card-title>
+			<md-card-content>
+				<kbn-vis vis-height="235px" vis-index-pattern="wazuh-alerts-*" vis-a="(filters:!(),linked:!f,query:(query_string:(analyze_wildcard:!t,query:'*')),uiState:(),vis:(aggs:!((enabled:!t,id:'1',params:(),schema:metric,type:count),(enabled:!t,id:'3',params:(field:rule.pci_dss,order:desc,orderBy:'1',size:10),schema:group,type:terms)),listeners:(),params:(addLegend:!t,addTimeMarker:!f,addTooltip:!t,defaultYExtents:!f,legendPosition:right,mode:grouped,orderBucketsBySum:!f,scale:linear,setYExtents:!f,shareYAxis:!t,times:!(),yAxis:()),title:'Требования PCI DSS',type:histogram))"
+					vis-filter="_exists_:rule.pci_dss AND agent.name: {{_agent.name ? _agent.name : '*'}}"">
+				</kbn-vis>
+			</md-card-content>
+		</md-card>
+		<md-card flex="30">
+			<md-card-title>
+				<md-card-title-text>
+					<span class="md-headline">Группы</span>
+				</md-card-title-text>
+			</md-card-title>
+			<md-card-content>
+				<kbn-vis vis-height="235px" vis-index-pattern="wazuh-alerts-*" vis-a="(filters:!(),linked:!f,query:(query_string:(analyze_wildcard:!t,query:'*')),uiState:(),vis:(aggs:!((enabled:!t,id:'1',params:(),schema:metric,type:count),(enabled:!t,id:'3',params:(field:rule.groups,order:desc,orderBy:'1',size:10),schema:segment,type:terms)),listeners:(),params:(addLegend:!t,addTooltip:!t,isDonut:!t,legendPosition:right,shareYAxis:!t),title:'Группы',type:pie))"
+					vis-filter="_exists_:rule.pci_dss AND agent.name: {{_agent.name ? _agent.name : '*'}}"">
+				</kbn-vis>
+			</md-card-content>
+		</md-card>
+	</md-content>
+	
+	<md-content layout-align="center stretch">
+		<md-card flex>
+			<md-card-title>
+				<md-card-title-text>
+					<span class="md-headline">Последние события</span>
+				</md-card-title-text>
+			</md-card-title>
+			<md-card-content>
+				<kbn-vis vis-height="450px" vis-index-pattern="wazuh-alerts-*" vis-a="(filters:!(),linked:!f,query:(query_string:(analyze_wildcard:!t,query:'*')),uiState:(vis:(params:(sort:(columnIndex:3,direction:desc)))),vis:(aggs:!((enabled:!t,id:'1',params:(),schema:metric,type:count),(enabled:!t,id:'4',params:(customLabel:'Имя агента',field:agent.name,order:desc,orderBy:'1',size:99999999),schema:bucket,type:terms),(enabled:!t,id:'5',params:(customLabel:Критерий,field:rule.pci_dss,order:desc,orderBy:'1',size:99999999),schema:bucket,type:terms),(enabled:!t,id:'6',params:(customLabel:'Описание правила',field:rule.description,order:desc,orderBy:'1',size:99999999),schema:bucket,type:terms)),listeners:(),params:(perPage:10,showMeticsAtAllLevels:!f,showPartialRows:!f,showTotal:!f,sort:(columnIndex:!n,direction:!n),totalFunc:sum),title:'Требования по агентам',type:table))"
+					vis-filter="_exists_:rule.pci_dss AND agent.name: {{_agent.name ? _agent.name : '*'}}"">
+				</kbn-vis>
+			</md-card-content>
+		</md-card>
+	</md-content>
+	
+	</div>
+</md-content>

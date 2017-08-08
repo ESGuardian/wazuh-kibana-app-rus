@@ -1,0 +1,198 @@
+<md-content flex ng-controller="settingsController" layout="column">
+
+	<md-content class="wazuhMenuNavBar" ng-init="menuNavItem = 'settings'" style="height: 70px;">
+	<md-nav-bar class="wazuhMenuNav" md-selected-nav-item="menuNavItem" nav-bar-aria-label="navigation menu">
+	  <md-nav-item id="header_logo" md-nav-href="#/" name="logo" aria-hidden="true">
+		<img aria-hidden="true" src="/plugins/wazuh/img/logo_white.png" height="44" weight="252"></img>
+	  </md-nav-item>
+			<md-nav-item md-nav-href="#/overview" name="overview">Обзор</md-nav-item>
+			<md-nav-item md-nav-href="#/manager" name="manager">Менеджер</md-nav-item>
+			<md-nav-item md-nav-href="#/agents" name="agents">Агенты</md-nav-item>
+			<md-nav-item md-nav-href="#/discover" name="discover">Поиск</md-nav-item>
+			<md-nav-item md-nav-href="#/dashboards" name="dashboards">Дашборды</md-nav-item>
+			<md-nav-item class="wazuhMenuNavBar_gear" md-nav-href="#/settings" name="settings"><i class="fa fa-cog ng-scope" aria-hidden="true"></i></md-nav-item>
+	</md-nav-bar>
+	</md-content>
+
+	<md-content class="headBar" layout="row"  layout-align="center start">
+		<md-nav-bar flex style="padding-right: 0px;" md-selected-nav-item="submenuNavItem" nav-bar-aria-label="navigation submenu">
+			<md-nav-item md-nav-click="submenuNavItem = 'api'" name="api">API</md-nav-item>
+			<md-nav-item md-nav-click="submenuNavItem = 'extensions'" name="extensions">Дополнительно</md-nav-item>
+			<md-nav-item md-nav-click="submenuNavItem = 'about'" name="about">About</md-nav-item>
+		</md-nav-bar>
+	</md-content>
+	
+  <div layout="column" layout-align="start stretch">
+  
+  	<md-card layout-padding layout-align="start stretch" ng-if="submenuNavItem == 'api' && apiEntries.length == 0">
+	
+		<h1 class="wazuh-h1">Добро пожаловать в Wazuh App для Kibana 5</h1>
+		<div>
+			<p>Wazuh App предоставляет удобный веб-интерфейс для мониторинга инфраструктуры Wazuh. Вы можете отслеживать статус агентов, последние и наиболее частые события и т.п.  Вы также можете просматривать конфигурацию и логи менеджера.</p>
+			<p>Кроме того, вы можете использовать любое из расширений:</p>
+			<ul>
+				<li>Linux Audit system integration.
+				<li>PCI DSS Compliance.
+				<li>OpenSCAP security compliance and vulnerability assessments.
+			</ul>
+			<p>Приложение объединяет такие фичи Wazuh как: <strong>Сбор и анализ логов</strong>, <strong>Мониторинг целостности файлов</strong>, <strong>Обнаружение нарушений и аномалий</strong> и <strong>мониторинг политик и соответствия стандартам.</strong></p>	
+			<p>Help us to improve this app. We would appreciate your feedback. Collaborate with us on the <a href="https://groups.google.com/forum/#!forum/wazuh">Mailing Lists</a> and/or the Wazuh App <a href="https://github.com/wazuh/wazuh-kibana-app">Github repository</a></p>	
+			<p>Эта редакция является форком оригинального Wazuh App и содержит косметические изменения, в основном перевод интерфейса на русский язык. Репозиторий этой редакции <a href="https://github.com/esguardian/wazuh-kibana-app">лежит здесь</a></p>
+			<br>
+			<p>Пожалуйста введите данные для доступа к Wazuh RESTful API в форме ниже, прежде чем начать.</p>	
+		</div>
+
+	</md-card>
+	
+	<md-card layout-padding layout-align="start stretch" ng-if="submenuNavItem == 'api'">
+	
+		<h1 class="wazuh-h1"><i class="fa fa-cog ng-scope" aria-hidden="true" style="font-size: 25px;"></i> Wazuh App: API configuration</h1>
+
+		<span layout="row" layout-align="start start">
+			<p flex="20" style="font-weight: bold;">Manager</p>
+			<p flex="20" style="font-weight: bold;">API URL</p>
+			<p flex="20" style="font-weight: bold;">API Port</p>
+			<p flex="20" style="font-weight: bold;">User</p>
+			<p flex="20" style="font-weight: bold;">Actions</p>
+			
+	
+		</span>
+		
+		<div ng-repeat="entry in apiEntries">
+			<span layout="row" layout-align="space-between center">
+				<p flex="20" ><i ng-show="(entry._source.active == 'true')" tooltip="Set as default Manager" class="fa fa-star" aria-hidden="true" style="color: #f39c12; font-size: 18px;"></i> {{entry._source.manager}}</p>
+				<p flex="20" >{{entry._source.url}}</p>
+				<p flex="20" >{{entry._source.api_port}}</p>
+				<p flex="20" >{{entry._source.api_user}}</p>
+				<p flex="20" >
+					<i ng-click="setDefault(entry)" tooltip="Set as default Manager" class="fa fa-star" aria-hidden="true" style="font-size: 18px;"></i>
+					<i ng-click="removeManager(entry)" tooltip="Remove manager" class="fa fa-trash" aria-hidden="true" style="margin-left: 7px;font-size: 18px;"></i>
+					<i ng-click="checkManager(entry)" tooltip="Check connection" class="fa fa-refresh" aria-hidden="true" style="margin-left: 7px;font-size: 18px;"></i>
+				</p>
+			</span>
+			
+			<md-divider></md-divider>
+		</div>
+		
+		<div layout="row" layout-align="center center">
+			<md-button flex="15" ng-click="$parent.addManagerContainer = !$parent.addManagerContainer" type="submit" class="buttonBlueLight md-raised md-primary"><i class="fa fa-plus-circle" aria-hidden="true" style="font-size: 15px;"></i> Add new API</md-button>
+		</div>
+		
+		<form flex ng-submit="processForm()" layout="column" layout-align="start stretch" ng-show="$parent.addManagerContainer || apiEntries.length == 0" style="margin-top: 30px; ">
+		  <md-input-container>
+			<label>Username</label>
+			<input placeholder="" type="text" ng-model="formData.user" aria-label="username" required></input>
+		  </md-input-container>
+		  <md-input-container>
+			<label>Password</label>
+			<input placeholder="" type="password" ng-model="formData.password" aria-label="password" required></input>
+		  </md-input-container>
+		  <md-input-container>
+			<label>URL</label>
+			<input placeholder="https://" ng-model="formData.url" type="url" aria-label="full url" required></input>
+		  </md-input-container>
+		  <md-input-container>
+			<label>Port</label>
+			<input placeholder="" ng-model="formData.port" type="text" aria-label="port" required></input>
+		  </md-input-container>
+		  <div layout="row" layout-align="center center">
+			<p style="color: #ff9999">{{messageError}}</p>
+		  </div>
+		  <div layout="row" layout-align="center center">
+			<md-button flex="15" type="submit" class="buttonBlueLight md-raised md-primary"><i class="fa fa-plus-circle" aria-hidden="true" style="font-size: 13px; margin-right: 5px; "></i>SAVE</md-button>
+		  </div>
+		</form>
+	
+	</md-card>
+
+	<md-card flex layout-padding layout-align="start stretch" ng-if="submenuNavItem == 'extensions'">
+	
+		<h1 class="wazuh-h1"><i class="fa fa-cog ng-scope" aria-hidden="true" style="font-size: 25px;"></i> Wazuh App: Extensions</h1>
+		
+		<p flex>Отметьте нужные вам дополнения. Эти дополнения включают специфические панели, дашборды и визуализации.</p>
+
+		<div>
+			<span layout="row" layout-align="space-between center" style="font-weight: bold">
+				PCI DSS
+			</span>
+			<span>
+				The Payment Card Industry Data Security Standard (PCI DSS) is a proprietary information security standard for organizations that handle branded credit cards from the major card schemes including Visa, MasterCard, American Express, Discover, and JCB. The PCI Standard is mandated by the card brands and administered by the Payment Card Industry Security Standards Council. The standard was created to increase controls around cardholder data to reduce credit card fraud.
+			</span>
+			<span>
+				<md-switch flex ng-model="extensions.pci" aria-label="extensionsPci" ng-change="toggleExtension('pci',extensions.pci)"></md-switch>
+			</span>
+			<md-divider></md-divider>
+		</div>
+		
+		<div>
+			<span layout="row" layout-align="space-between center" style="font-weight: bold">
+				OpenSCAP
+			</span>
+			<span>
+				OVAL (Open Vulnerability Assessment Language) interpreter used to check system configuration and detect vulnerable applications. It is recognized as a standardized compliance and hardening checking solution for enterprise-level infrastructure.
+			</span>
+			<span>
+				<md-switch flex ng-model="extensions.oscap" aria-label="extensionsOscap" ng-change="toggleExtension('oscap',extensions.oscap)"></md-switch>
+			</span>
+			<md-divider></md-divider>
+		</div>
+		
+		<div>
+			<span layout="row" layout-align="space-between center" style="font-weight: bold">
+				Audit
+			</span>
+			<span>
+				The Linux Audit system provides a way to track security-relevant information on your system. Based on pre-configured rules, Audit generates log entries to record as much information about the events that are happening on your system as possible.
+			</span>
+			<span layout="row" layout-align="space-between center">
+				<md-switch flex ng-model="extensions.audit" aria-label="extensionsAudit" ng-change="toggleExtension('audit',extensions.audit)"></md-switch>
+			</span>
+		</div>		
+  
+	</md-card>
+	
+	<md-content layout="column" layout-align="start stretch" ng-if="submenuNavItem == 'about'">
+	
+	  	<md-card layout-align="start stretch">
+			<md-card-content>
+				<h1 class="wazuh-h1">About</h1>
+				<div>
+					<p>Wazuh App предоставляет удобный веб-интерфейс для мониторинга инфраструктуры Wazuh. Вы можете отслеживать статус агентов, последние и наиболее частые события и т.п.  Вы также можете просматривать конфигурацию и логи менеджера.</p>
+					<p>Кроме того, вы можете использовать любое из расширений:</p>
+					<ul>
+						<li>Linux Audit system integration.
+						<li>PCI DSS Compliance.
+						<li>OpenSCAP security compliance and vulnerability assessments.
+					</ul>
+					<p>Приложение объединяет такие фичи Wazuh как: <strong>Сбор и анализ логов</strong>, <strong>Мониторинг целостности файлов</strong>, <strong>Обнаружение нарушений и аномалий</strong> и <strong>мониторинг политик и соответствия стандартам.</strong></p>	
+			<p>Help us to improve this app. We would appreciate your feedback. Collaborate with us on the <a href="https://groups.google.com/forum/#!forum/wazuh">Mailing Lists</a> and/or the Wazuh App <a href="https://github.com/wazuh/wazuh-kibana-app">Github repository</a></p>	
+			<p>Эта редакция является форком оригинального Wazuh App и содержит косметические изменения, в основном перевод интерфейса на русский язык. Репозиторий этой редакции <a href="https://github.com/esguardian/wazuh-kibana-app">лежит здесь</a></p>	
+				</div>
+			</md-card-content>
+		</md-card>
+		
+		
+		<md-card layout-align="start stretch">
+			<md-card-content style="width: 500px;">
+				<h1 class="wazuh-h1">Версия</h1>
+				<span layout="row" layout-align="space-between center">
+					<p>Версия приложения</p>
+					<p>{{appInfo["app-version"]}}</p>
+				</span>
+				<md-divider></md-divider>
+				<span layout="row" layout-align="space-between center">
+					<p>Дата установки</p>
+					<p>{{appInfo["installationDate"]}}</p>
+				</span>
+				<md-divider></md-divider>
+				<span layout="row" layout-align="space-between center">
+					<p>Ревизия</p>
+					<p>{{appInfo["revision"]}}</p>
+				</span>
+				
+			</md-card-content>
+		</md-card>			
+	</md-content>	
+  </div>
+
+</md-content>
