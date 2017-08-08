@@ -9,7 +9,9 @@
 
 ## Установка
 
-```/usr/share/kibana/bin/kibana-plugin install https://github.com/ESGuardian/LittleBeat/raw/master/addons/wazuh-ids/wazuhapp_rus.zip ```
+```
+/usr/share/kibana/bin/kibana-plugin install https://github.com/ESGuardian/LittleBeat/raw/master/addons/wazuh-ids/wazuhapp_rus.zip 
+```
 
 ## Замена оригинальной wazuhapp
 
@@ -19,7 +21,9 @@
 
 Установите новый плагин
 
-```/usr/share/kibana/bin/kibana-plugin install https://github.com/ESGuardian/LittleBeat/raw/master/addons/wazuh-ids/wazuhapp_rus.zip ```
+```
+/usr/share/kibana/bin/kibana-plugin install https://github.com/ESGuardian/LittleBeat/raw/master/addons/wazuh-ids/wazuhapp_rus.zip 
+```
 
 ## Восстановление оригинальной wazuhapp
 
@@ -27,7 +31,9 @@
 
 Установите оригинальный плагин
 
-```/usr/share/kibana/bin/kibana-plugin install https://github.com/ESGuardian/LittleBeat/raw/master/addons/wazuh-ids/wazuhapp.zip ```
+```
+/usr/share/kibana/bin/kibana-plugin install https://github.com/ESGuardian/LittleBeat/raw/master/addons/wazuh-ids/wazuhapp.zip 
+```
 
 
 ## Используются программы и компоненты
